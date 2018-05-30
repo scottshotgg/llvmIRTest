@@ -24,32 +24,40 @@ import (
 )
 
 func main() {
-	// Create convenience types and constants.
-	i32 := types.I32
-	zero := constant.NewInt(0, i32)
-	one := constant.NewInt(1, i32)
-
 	// Create a new LLVM IR module.
 	m := ir.NewModule()
 
 	// Create a function definition and append it to the module.
 	//
 	//    int rand(void) { ... }
-	mainFunc := m.NewFunction("main", i32)
+	mainFunc := m.NewFunction("main", types.I32)
+	returnBlock := ir.NewBlock("")
 
-	// Create instructions and append them to the entry basic block.
+	For(mainFunc, returnBlock, constant.NewInt(0, types.I32), constant.NewInt(10, types.I32))
 
-	until := constant.NewInt(10, i32)
-	i := zero
+	mainFunc.AppendBlock(returnBlock)
+	returnBlock.NewRet(constant.NewInt(0, types.I32))
 
-	forLoop := mainFunc.NewBlock("")
-	returnBlock := mainFunc.NewBlock("")
-	forLoop.NewCondBr(forLoop.NewICmp(ir.IntEQ, i, until), returnBlock, forLoop)
-	ptr := forLoop.NewIntToPtr(i, types.NewPointer(i32))
-	forLoop.NewStore(forLoop.NewAdd(i, one), ptr)
-
-	returnBlock.NewRet(i)
-
-	// Print the LLVM IR assembly of the module.
+	// // Print the LLVM IR assembly of the module.
 	fmt.Println(m)
+}
+
+func For(fromFunction *ir.Function, targetBlock *ir.BasicBlock, start, end *constant.Int /* array of token.Value here */) {
+	allocBlock := fromFunction.NewBlock("")
+	compareBlock := fromFunction.NewBlock("")
+	incrementBlock := fromFunction.NewBlock("")
+
+	startVar := allocBlock.NewAlloca(types.I32)
+	indexVar := allocBlock.NewAlloca(types.I32)
+	allocBlock.NewStore(constant.NewInt(0, types.I32), startVar)
+	allocBlock.NewStore(constant.NewInt(0, types.I32), indexVar)
+	allocBlock.NewBr(compareBlock)
+
+	loadedIndexVar := compareBlock.NewLoad(indexVar)
+	breakOut := compareBlock.NewICmp(ir.IntSLT, loadedIndexVar, end)
+	compareBlock.NewCondBr(breakOut, incrementBlock, targetBlock)
+
+	added := incrementBlock.NewAdd(loadedIndexVar, constant.NewInt(1, types.I32))
+	incrementBlock.NewStore(added, indexVar)
+	incrementBlock.NewBr(compareBlock)
 }

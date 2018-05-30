@@ -1,0 +1,29 @@
+	.section	__TEXT,__text,regular,pure_instructions
+	.macosx_version_min 10, 12
+	.globl	_main                   ## -- Begin function main
+	.p2align	4, 0x90
+_main:                                  ## @main
+	.cfi_startproc
+## %bb.0:
+	subl	$8, %esp
+	.cfi_def_cfa_offset 12
+	movl	$0, 4(%esp)
+	movl	$0, (%esp)
+	movl	(%esp), %eax
+	cmpl	$9, %eax
+	jg	LBB0_3
+	.p2align	4, 0x90
+LBB0_2:                                 ## =>This Inner Loop Header: Depth=1
+	incl	%eax
+	movl	%eax, (%esp)
+	movl	(%esp), %eax
+	cmpl	$9, %eax
+	jle	LBB0_2
+LBB0_3:
+	xorl	%eax, %eax
+	addl	$8, %esp
+	retl
+	.cfi_endproc
+                                        ## -- End function
+
+.subsections_via_symbols
