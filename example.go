@@ -41,9 +41,9 @@ func main() {
 
 	// Create convenience types and constants.
 	i32 := types.I32
-	zero := constant.NewInt(0, i32)
-	a := constant.NewInt(0x15A4E35, i32) // multiplier of the PRNG.
-	c := constant.NewInt(1, i32)         // increment of the PRNG.
+	zero := constant.NewInt(i32, 0)
+	a := constant.NewInt(i32, 0x15A4E35) // multiplier of the PRNG.
+	c := constant.NewInt(i32, 1)         // increment of the PRNG.
 
 	// Create a new LLVM IR module.
 	m := ir.NewModule()
@@ -51,7 +51,7 @@ func main() {
 	// Create an external function declaration and append it to the module.
 	//
 	//    int abs(int x);
-	abs := m.NewFunction("abs", i32, ir.NewParam("x", i32))
+	abs := m.NewFunc("abs", i32, ir.NewParam("x", i32))
 
 	// Create a global variable definition and append it to the module.
 	//
@@ -61,7 +61,7 @@ func main() {
 	// Create a function definition and append it to the module.
 	//
 	//    int rand(void) { ... }
-	rand := m.NewFunction("rand", i32)
+	rand := m.NewFunc("rand", i32)
 
 	// Create an unnamed entry basic block and append it to the `rand` function.
 	entry := rand.NewBlock("")
